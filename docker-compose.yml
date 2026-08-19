@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  bot:
+    build: .
+    container_name: tg_llm_bot
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    env_file:
+      - .env
+    environment:
+      # Внутри Docker-сети обращаемся к контейнеру ollama
+      - LLM_BASE_URL=http://ollama:11434/v1
+
+volumes:
+  ollama_data:
